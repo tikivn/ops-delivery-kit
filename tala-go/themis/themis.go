@@ -25,6 +25,12 @@ type User struct {
 	Name  string `json:"name"`
 }
 
+type Authorize struct {
+	Token    string `json:"token"`
+	Resource string `json:"resource"`
+	Action   string `json:"action"`
+}
+
 type Paging struct {
 	CurrentPage int `json:"current_page"`
 	Total       int `json:"total"`
@@ -208,7 +214,11 @@ func (t *client) AuthorizeToken(ctx context.Context, resource, action, token str
 		resource, action, token,
 	)
 
-	err := t.call(ctx, path, "GET", nil, &authorizeResponse)
+	err := t.call(ctx, path, "POST", Authorize{
+		Token:    token,
+		Resource: resource,
+		Action:   action,
+	}, &authorizeResponse)
 	if err != nil {
 		return false, err
 	}
