@@ -210,11 +210,7 @@ func (t *client) AuthorizeSubject(ctx context.Context, resource, action, subject
 
 func (t *client) AuthorizeToken(ctx context.Context, resource, action, token string) (bool, error) {
 	var authorizeResponse authorizeResponse
-	path := fmt.Sprintf("access-tokens/authorize?resource=%s&action=%s&token=%s",
-		resource, action, token,
-	)
-
-	err := t.call(ctx, path, "POST", Authorize{
+	err := t.call(ctx, "access-tokens/authorize", "POST", Authorize{
 		Token:    token,
 		Resource: resource,
 		Action:   action,
