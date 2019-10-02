@@ -271,7 +271,7 @@ func (t *client) call(ctx context.Context, path string, method string, data inte
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != 200 && resp.StatusCode != 401 {
 		return fmt.Errorf("Themis(%d), url = %s", resp.StatusCode, path)
 	}
 
