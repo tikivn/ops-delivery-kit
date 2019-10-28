@@ -3,6 +3,7 @@ package publisher
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/pkg/errors"
@@ -34,9 +35,10 @@ func (p *KafkaPublisher) Publish(ctx context.Context, key []byte, value interfac
 		return errors.Wrapf(err, "Publisher: marshal error (%s)", key)
 	}
 	_, _, err = p.p.SendMessage(&sarama.ProducerMessage{
-		Topic: p.topic,
-		Key:   sarama.ByteEncoder(key),
-		Value: sarama.ByteEncoder(bytes),
+		Topic:     p.topic,
+		Timestamp: time.Now().UTC(),
+		Key:       sarama.ByteEncoder(key),
+		Value:     sarama.ByteEncoder(bytes),
 	})
 	if err != nil {
 		return errors.Wrapf(err, "Publisher: Publish message error (%s)", key)
