@@ -17,8 +17,8 @@ type KafkaPublisher struct {
 	marshal MarshalFunc
 }
 
-func NewPublisher(brokers []string, topic string) (*KafkaPublisher, error) {
-	p, err := sarama.NewSyncProducer(brokers, nil)
+func NewPublisher(brokers []string, topic string, cfg *sarama.Config) (*KafkaPublisher, error) {
+	p, err := sarama.NewSyncProducer(brokers, cfg)
 	if err != nil {
 		return nil, err
 	}
