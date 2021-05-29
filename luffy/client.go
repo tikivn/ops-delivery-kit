@@ -20,6 +20,8 @@ type HttpDoer interface {
 
 type Client interface {
 	CreateShipment(ctx context.Context, req Request) (CreateShipmentResult, error)
+	CancelShipment(ctx context.Context, trackingInfo TrackingInfo) (bool, error)
+	GetShipment(ctx context.Context, trackingInfo TrackingInfo) (CreateShipmentResult, error)
 	GetQuotes(ctx context.Context, req Request) (QuotesResult, error)
 }
 
@@ -114,6 +116,78 @@ func (c *client) CreateShipment(ctx context.Context, payload Request) (CreateShi
 
 		if err := json.Unmarshal(result, &e); err != nil {
 			return e, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+		}
+
+		return e, nil
+	}
+
+	return CreateShipmentResult{}, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
+}
+
+func (c *client) CancelShipment(ctx context.Context, trackingInfo TrackingInfo) (bool, error) {
+	path := fmt.Sprintf("%v/v1/request/cancel", c.host)
+
+	body, err := json.Marshal(trackingInfo)
+	if err != nil {
+		return false, errors.Wrapf(err, "luffy: Cant marshal request body")
+	}
+
+	req, err := http.NewRequest("POST", path, bytes.NewBuffer(body))
+	if err != nil {
+		return false, errors.Wrapf(err, "luffy: Cant create Request")
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req = req.WithContext(ctx)
+
+	res, err := c.httpDoer.Do(req)
+	if err != nil {
+		return false, errors.Wrapf(err, "luffy: Response error for query")
+	}
+	defer res.Body.Close()
+
+	result, err := ioutil.ReadAll(res.Body)
+
+	if res.StatusCode == http.StatusOK {
+		e := CreateShipmentResult{}
+
+		if err := json.Unmarshal(result, &e); err != nil {
+			return false, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+		}
+
+		return true, nil
+	}
+
+	return false, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
+}
+
+func (c *client) GetShipment(ctx context.Context, trackingInfo TrackingInfo) (CreateShipmentResult, error) {
+	path := fmt.Sprintf("%v/v1/request/getInfo", c.host)
+
+	body, err := json.Marshal(trackingInfo)
+	if err != nil {
+		return CreateShipmentResult{}, errors.Wrapf(err, "luffy: Cant marshal request body")
+	}
+
+	req, err := http.NewRequest("POST", path, bytes.NewBuffer(body))
+	if err != nil {
+		return CreateShipmentResult{}, errors.Wrapf(err, "luffy: Cant create Request")
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req = req.WithContext(ctx)
+
+	res, err := c.httpDoer.Do(req)
+	if err != nil {
+		return CreateShipmentResult{}, errors.Wrapf(err, "luffy: Response error for query")
+	}
+	defer res.Body.Close()
+
+	result, err := ioutil.ReadAll(res.Body)
+
+	if res.StatusCode == http.StatusOK {
+		e := CreateShipmentResult{}
+
+		if err := json.Unmarshal(result, &e); err != nil {
+			return CreateShipmentResult{}, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
 		}
 
 		return e, nil
