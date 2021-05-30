@@ -24,6 +24,7 @@ type CreateShipmentResult struct {
 	ZoneCode    string `json:"zone_code,omitempty"`
 	PartnerCode string `json:"partner_code,omitempty"`
 	SortingCode string `json:"sorting_code,omitempty"`
+	Quote       Quote  `json:"quote"`
 }
 
 const (
