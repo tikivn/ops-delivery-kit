@@ -21,7 +21,7 @@ type HttpDoer interface {
 type Client interface {
 	CreateShipment(ctx context.Context, req Request) (CreateShipmentResult, error)
 	CancelShipment(ctx context.Context, trackingInfo TrackingInfo) (bool, error)
-	GetShipment(ctx context.Context, trackingInfo TrackingInfo) (CreateShipmentResult, error)
+	GetShipment(ctx context.Context, trackingInfo TrackingInfo) (InfoResult, error)
 	GetQuotes(ctx context.Context, req Request) (QuotesResult, error)
 }
 
@@ -160,38 +160,38 @@ func (c *client) CancelShipment(ctx context.Context, trackingInfo TrackingInfo) 
 	return false, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
 }
 
-func (c *client) GetShipment(ctx context.Context, trackingInfo TrackingInfo) (CreateShipmentResult, error) {
+func (c *client) GetShipment(ctx context.Context, trackingInfo TrackingInfo) (InfoResult, error) {
 	path := fmt.Sprintf("%v/v1/request/getInfo", c.host)
 
 	body, err := json.Marshal(trackingInfo)
 	if err != nil {
-		return CreateShipmentResult{}, errors.Wrapf(err, "luffy: Cant marshal request body")
+		return InfoResult{}, errors.Wrapf(err, "luffy: Cant marshal request body")
 	}
 
 	req, err := http.NewRequest("POST", path, bytes.NewBuffer(body))
 	if err != nil {
-		return CreateShipmentResult{}, errors.Wrapf(err, "luffy: Cant create Request")
+		return InfoResult{}, errors.Wrapf(err, "luffy: Cant create Request")
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req = req.WithContext(ctx)
 
 	res, err := c.httpDoer.Do(req)
 	if err != nil {
-		return CreateShipmentResult{}, errors.Wrapf(err, "luffy: Response error for query")
+		return InfoResult{}, errors.Wrapf(err, "luffy: Response error for query")
 	}
 	defer res.Body.Close()
 
 	result, err := ioutil.ReadAll(res.Body)
 
 	if res.StatusCode == http.StatusOK {
-		e := CreateShipmentResult{}
+		e := InfoResult{}
 
 		if err := json.Unmarshal(result, &e); err != nil {
-			return CreateShipmentResult{}, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+			return InfoResult{}, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
 		}
 
 		return e, nil
 	}
 
-	return CreateShipmentResult{}, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
+	return InfoResult{}, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
 }
