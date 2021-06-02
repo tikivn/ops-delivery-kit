@@ -28,11 +28,12 @@ type Client interface {
 type client struct {
 	host     string
 	httpDoer HttpDoer
+	clientID string
 }
 
 var _ Client = (*client)(nil)
 
-func NewLuffyClient(host string, httpDoer HttpDoer) *client {
+func NewLuffyClient(host string, clientID string, httpDoer HttpDoer) *client {
 	if httpDoer == nil {
 		httpDoer = &http.Client{
 			Transport: &ochttp.Transport{},
@@ -43,6 +44,7 @@ func NewLuffyClient(host string, httpDoer HttpDoer) *client {
 	return &client{
 		host:     host,
 		httpDoer: httpDoer,
+		clientID: clientID,
 	}
 }
 
@@ -65,6 +67,7 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 		return QuotesResult{}, errors.Wrapf(err, "luffy: Cant get quotes")
 	}
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("client_id", c.clientID)
 	req = req.WithContext(ctx)
 
 	res, err := c.httpDoer.Do(req)
@@ -101,6 +104,7 @@ func (c *client) CreateShipment(ctx context.Context, payload Request) (CreateShi
 		return CreateShipmentResult{}, errors.Wrapf(err, "luffy: Cant create Request")
 	}
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("client_id", c.clientID)
 	req = req.WithContext(ctx)
 
 	res, err := c.httpDoer.Do(req)
@@ -137,6 +141,7 @@ func (c *client) CancelShipment(ctx context.Context, trackingInfo TrackingInfo) 
 		return false, errors.Wrapf(err, "luffy: Cant create Request")
 	}
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("client_id", c.clientID)
 	req = req.WithContext(ctx)
 
 	res, err := c.httpDoer.Do(req)
@@ -173,6 +178,7 @@ func (c *client) GetShipment(ctx context.Context, trackingInfo TrackingInfo) (In
 		return InfoResult{}, errors.Wrapf(err, "luffy: Cant create Request")
 	}
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("client_id", c.clientID)
 	req = req.WithContext(ctx)
 
 	res, err := c.httpDoer.Do(req)
