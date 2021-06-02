@@ -105,6 +105,15 @@ type ExtraInfo struct {
 	IsCrossZone    int       `json:"is_cross_zone"`
 }
 
+type Driver struct {
+	Name         string  `json:"name"`
+	Phone        string  `json:"phone"`
+	LicensePlate string  `json:"license_plate"`
+	PhotoURL     string  `json:"photo_url"`
+	CurrentLat   float64 `json:"current_lat"`
+	CurrentLng   float64 `json:"current_lng"`
+}
+
 type CallbackPayload struct {
 	PartnerCode             string     `json:"partner_code"`
 	RequestedTrackingNumber string     `json:"requested_tracking_number"`
@@ -129,4 +138,5 @@ type CallbackPayload struct {
 	ExtraInfo               ExtraInfo  `json:"extra_info"`
 	RawData                 string     `json:"raw_data"`
 	Version                 string     `json:"version"`
+	Driver                  Driver     `json:"driver"`
 }
