@@ -5,12 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/pkg/errors"
-
+	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ochttp"
 )
 
@@ -67,14 +68,19 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 		return QuotesResult{}, errors.Wrapf(err, "luffy: Cant get quotes")
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("client_id", c.clientID)
+	req.Header.Add("Client-Id", c.clientID)
 	req = req.WithContext(ctx)
 
 	res, err := c.httpDoer.Do(req)
 	if err != nil {
 		return QuotesResult{}, errors.Wrapf(err, "luffy: Response error for query")
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}(res.Body)
 
 	result, err := ioutil.ReadAll(res.Body)
 
@@ -111,7 +117,12 @@ func (c *client) CreateShipment(ctx context.Context, payload Request) (CreateShi
 	if err != nil {
 		return CreateShipmentResult{}, errors.Wrapf(err, "luffy: Response error for query")
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}(res.Body)
 
 	result, err := ioutil.ReadAll(res.Body)
 
@@ -148,7 +159,12 @@ func (c *client) CancelShipment(ctx context.Context, trackingInfo TrackingInfo) 
 	if err != nil {
 		return false, errors.Wrapf(err, "luffy: Response error for query")
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}(res.Body)
 
 	result, err := ioutil.ReadAll(res.Body)
 
@@ -185,7 +201,12 @@ func (c *client) GetShipment(ctx context.Context, trackingInfo TrackingInfo) (In
 	if err != nil {
 		return InfoResult{}, errors.Wrapf(err, "luffy: Response error for query")
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}(res.Body)
 
 	result, err := ioutil.ReadAll(res.Body)
 
