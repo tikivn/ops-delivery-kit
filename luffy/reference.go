@@ -19,13 +19,15 @@ const (
 )
 
 type CreateShipmentResult struct {
-	Status      string `json:"status,omitempty"`
-	Error       string `json:"error,omitempty"`
-	ZoneCode    string `json:"zone_code,omitempty"`
-	PartnerCode string `json:"partner_code,omitempty"`
-	SortingCode string `json:"sorting_code,omitempty"`
-	TrackingID  string `json:"tracking_id,omitempty"`
-	Quote       Quote  `json:"quote"`
+	Status        string `json:"status,omitempty"`
+	Error         string `json:"error,omitempty"`
+	ZoneCode      string `json:"zone_code,omitempty"`
+	PartnerCode   string `json:"partner_code,omitempty"`
+	SortingCode   string `json:"sorting_code,omitempty"`
+	TrackingID    string `json:"tracking_id,omitempty"`
+	CurrentStatus string `json:"current_status"`
+	ReasonCode    string `json:"reason_code"`
+	Quote         Quote  `json:"quote"`
 }
 
 const (
