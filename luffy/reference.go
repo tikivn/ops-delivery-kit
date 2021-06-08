@@ -65,5 +65,6 @@ type EstimatedTimeline struct {
 type InfoResult struct {
 	Quote         Quote  `json:"quote"`
 	CurrentStatus string `json:"current_status"`
+	ReasonCode    string `json:"reason_code"`
 	Driver        Driver `json:"driver"`
 }
