@@ -92,6 +92,12 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 	return QuotesResult{}, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
 }
 
+type shipcodeResponse struct {
+	Status   string `json:"status"`
+	Shipcode string `json:"shipcode"`
+	Error    string `json:"error"`
+}
+
 func (c *client) GenerateShipcode(ctx context.Context, payload Payload) (string, error) {
 	path := fmt.Sprintf("%v/v1/shipcode/generate", c.host)
 
@@ -122,13 +128,13 @@ func (c *client) GenerateShipcode(ctx context.Context, payload Payload) (string,
 	result, err := ioutil.ReadAll(res.Body)
 
 	if res.StatusCode == http.StatusOK {
-		var e map[string]interface{}
+		e := shipcodeResponse{}
 
 		if err := json.Unmarshal(result, &e); err != nil {
-			return e["shipcode"].(string), errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+			return "", errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
 		}
 
-		return e["shipcode"].(string), nil
+		return e.Shipcode, nil
 	}
 
 	return "", errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
