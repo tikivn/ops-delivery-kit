@@ -122,13 +122,13 @@ func (c *client) GenerateShipcode(ctx context.Context, payload Payload) (string,
 	result, err := ioutil.ReadAll(res.Body)
 
 	if res.StatusCode == http.StatusOK {
-		var e string
+		var e map[string]interface{}
 
 		if err := json.Unmarshal(result, &e); err != nil {
-			return e, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+			return e["shipcode"].(string), errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
 		}
 
-		return e, nil
+		return e["shipcode"].(string), nil
 	}
 
 	return "", errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
