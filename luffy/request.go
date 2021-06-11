@@ -139,4 +139,5 @@ type CallbackPayload struct {
 	RawData                 string     `json:"raw_data"`
 	Version                 string     `json:"version"`
 	Driver                  Driver     `json:"driver"`
+	TrackingURL             string     `json:"tracking_url"`
 }
