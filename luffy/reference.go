@@ -28,6 +28,7 @@ type CreateShipmentResult struct {
 	CurrentStatus string `json:"current_status"`
 	ReasonCode    string `json:"reason_code"`
 	Quote         Quote  `json:"quote"`
+	TrackingURL   string `json:"tracking_url"`
 }
 
 const (
