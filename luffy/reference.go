@@ -69,4 +69,5 @@ type InfoResult struct {
 	CurrentStatus string `json:"current_status"`
 	ReasonCode    string `json:"reason_code"`
 	Driver        Driver `json:"driver"`
+	TrackingURL   string `json:"tracking_url"`
 }
