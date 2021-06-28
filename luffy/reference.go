@@ -47,6 +47,7 @@ type Quote struct {
 	Service           Service           `json:"service"`
 	Fee               Fee               `json:"fee"`
 	EstimatedTimeline EstimatedTimeline `json:"estimated_timeline"`
+	Distance          int               `json:"distance"`
 }
 
 type Service struct {
