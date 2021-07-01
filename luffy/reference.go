@@ -44,6 +44,7 @@ type QuotesResult struct {
 }
 
 type Quote struct {
+	PartnerCode       string            `json:"partner_code"`
 	Service           Service           `json:"service"`
 	Fee               Fee               `json:"fee"`
 	EstimatedTimeline EstimatedTimeline `json:"estimated_timeline"`
