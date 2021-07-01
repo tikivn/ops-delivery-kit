@@ -21,6 +21,7 @@ type HttpDoer interface {
 
 type Client interface {
 	GetQuotes(ctx context.Context, req Request) (QuotesResult, error)
+	GetQuotesV2(ctx context.Context, req Request) (QuotesResult, error)
 	GenerateShipcode(ctx context.Context, payload Payload) (string, error)
 	CreateShipment(ctx context.Context, req Request) (CreateShipmentResult, error)
 	CancelShipment(ctx context.Context, trackingInfo TrackingInfo) (bool, error)
@@ -264,4 +265,51 @@ func (c *client) GetShipment(ctx context.Context, trackingInfo TrackingInfo) (In
 	}
 
 	return InfoResult{}, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
+}
+
+func (c *client) GetQuotesV2(ctx context.Context, payload Request) (QuotesResult, error) {
+	path := fmt.Sprintf("%v/v2/request/quotes", c.host)
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return QuotesResult{}, errors.Wrapf(err, "luffy: Can not marshal request body")
+	}
+
+	req, err := http.NewRequest("POST", path, bytes.NewBuffer(body))
+	if err != nil {
+		return QuotesResult{}, errors.Wrapf(err, "luffy: Can not get quotes")
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Client-Id", c.clientID)
+	req = req.WithContext(ctx)
+
+	res, err := c.httpDoer.Do(req)
+	if err != nil {
+		return QuotesResult{}, errors.Wrapf(err, "luffy: Response error for query")
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}(res.Body)
+
+	result, err := ioutil.ReadAll(res.Body)
+
+	if res.StatusCode == http.StatusOK {
+		e := QuotesResult{}
+
+		if err := json.Unmarshal(result, &e); err != nil {
+			return e, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+		}
+
+		return e, nil
+	}
+
+	failedResponse := FailedResponse{}
+	if err = json.Unmarshal(result, &failedResponse); err == nil {
+		return QuotesResult{}, errors.Errorf("%s", failedResponse.Error)
+	}
+
+	return QuotesResult{}, errors.Errorf("luffy: server response status code = %d, response = %s", res.StatusCode, result)
 }

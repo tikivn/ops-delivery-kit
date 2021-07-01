@@ -74,3 +74,8 @@ type InfoResult struct {
 	Driver        Driver `json:"driver"`
 	TrackingURL   string `json:"tracking_url"`
 }
+
+type FailedResponse struct {
+	Error  string `json:"error"`
+	Status string `json:"status"`
+}
