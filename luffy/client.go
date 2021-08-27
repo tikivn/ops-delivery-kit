@@ -137,6 +137,11 @@ func (c *client) CreateShipment(ctx context.Context, payload Request) (CreateShi
 		return e, nil
 	}
 
+	failedResponse := FailedResponse{}
+	if err = json.Unmarshal(result, &failedResponse); err == nil {
+		return CreateShipmentResult{}, errors.Errorf("%s", failedResponse.Error)
+	}
+
 	return CreateShipmentResult{}, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
 }
 
