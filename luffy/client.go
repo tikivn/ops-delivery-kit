@@ -89,7 +89,7 @@ func (c *client) GenerateShipcode(ctx context.Context, payload Payload) (string,
 		e := shipcodeResponse{}
 
 		if err := json.Unmarshal(result, &e); err != nil {
-			return "", errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+			return "", errors.Wrapf(err, "luffy: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
 		return e.Shipcode, nil
@@ -131,7 +131,7 @@ func (c *client) CreateShipment(ctx context.Context, payload Request) (CreateShi
 		e := CreateShipmentResult{}
 
 		if err := json.Unmarshal(result, &e); err != nil {
-			return e, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+			return e, errors.Wrapf(err, "luffy: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
 		return e, nil
@@ -139,7 +139,7 @@ func (c *client) CreateShipment(ctx context.Context, payload Request) (CreateShi
 
 	failedResponse := FailedResponse{}
 	if err = json.Unmarshal(result, &failedResponse); err == nil {
-		return CreateShipmentResult{}, errors.Errorf("%s", failedResponse.Error)
+		return CreateShipmentResult{}, CreateShipmentFailError{Message: failedResponse.Error}
 	}
 
 	return CreateShipmentResult{}, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
@@ -178,7 +178,7 @@ func (c *client) CancelShipment(ctx context.Context, trackingInfo TrackingInfo) 
 		e := CreateShipmentResult{}
 
 		if err := json.Unmarshal(result, &e); err != nil {
-			return false, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+			return false, errors.Wrapf(err, "luffy: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
 		return true, nil
@@ -220,7 +220,7 @@ func (c *client) GetShipment(ctx context.Context, trackingInfo TrackingInfo) (In
 		e := InfoResult{}
 
 		if err := json.Unmarshal(result, &e); err != nil {
-			return InfoResult{}, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+			return InfoResult{}, errors.Wrapf(err, "luffy: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
 		return e, nil
@@ -262,7 +262,7 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 		e := QuotesResult{}
 
 		if err := json.Unmarshal(result, &e); err != nil {
-			return e, errors.Wrapf(err, "luffy: couldnt decode json, body %s", string(body))
+			return e, errors.Wrapf(err, "luffy: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
 		return e, nil
@@ -270,7 +270,7 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 
 	failedResponse := FailedResponse{}
 	if err = json.Unmarshal(result, &failedResponse); err == nil {
-		return QuotesResult{}, errors.Errorf("%s", failedResponse.Error)
+		return QuotesResult{}, GetQuotesFailError{Message: failedResponse.Error}
 	}
 
 	return QuotesResult{}, errors.Errorf("luffy: server response status code = %d, response = %s", res.StatusCode, result)
