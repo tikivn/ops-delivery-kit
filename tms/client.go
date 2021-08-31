@@ -146,7 +146,7 @@ func (c *client) CreateShipment(ctx context.Context, payload Request) (CreateShi
 }
 
 func (c *client) CancelShipment(ctx context.Context, trackingInfo TrackingInfo) (bool, error) {
-	path := fmt.Sprintf("%v/s2s/express/cancel", c.host)
+	path := fmt.Sprintf("%v/s2s/express/cancelShipment", c.host)
 
 	body, err := json.Marshal(trackingInfo)
 	if err != nil {
