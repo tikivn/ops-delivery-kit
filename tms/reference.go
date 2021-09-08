@@ -21,7 +21,6 @@ type CreateShipmentResult struct {
 
 type QuotesResult struct {
 	Error  string  `json:"error,omitempty"`
-	Status string  `json:"status,omitempty"`
 	Quotes []Quote `json:"quotes"`
 }
 
@@ -50,6 +49,7 @@ type EstimatedTimeline struct {
 }
 
 type InfoResult struct {
+	Error         string `json:"error,omitempty"`
 	Quote         Quote  `json:"quote"`
 	CurrentStatus string `json:"current_status"`
 	ReasonCode    string `json:"reason_code"`

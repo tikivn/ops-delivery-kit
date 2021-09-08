@@ -92,6 +92,10 @@ func (c *client) GenerateShipcode(ctx context.Context, payload Payload) (string,
 			return "", errors.Wrapf(err, "tms: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
+		if e.Error != "" {
+			return "", errors.New(e.Error)
+		}
+
 		return e.Shipcode, nil
 	}
 
@@ -180,6 +184,10 @@ func (c *client) CancelShipment(ctx context.Context, trackingInfo TrackingInfo) 
 			return false, errors.Wrapf(err, "tms: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
+		if e.Error != "" {
+			return false, errors.New(e.Error)
+		}
+
 		return true, nil
 	}
 
@@ -220,6 +228,10 @@ func (c *client) GetShipment(ctx context.Context, trackingInfo TrackingInfo) (In
 
 		if err := json.Unmarshal(result, &e); err != nil {
 			return InfoResult{}, errors.Wrapf(err, "tms: couldnt decode json, body %s, response %s", string(body), result)
+		}
+
+		if e.Error != "" {
+			return InfoResult{}, errors.New(e.Error)
 		}
 
 		return e, nil
