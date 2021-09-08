@@ -20,6 +20,8 @@ type CreateShipmentResult struct {
 }
 
 type QuotesResult struct {
+	Error  string  `json:"error,omitempty"`
+	Status string  `json:"status,omitempty"`
 	Quotes []Quote `json:"quotes"`
 }
 
@@ -53,9 +55,4 @@ type InfoResult struct {
 	ReasonCode    string `json:"reason_code"`
 	Driver        Driver `json:"driver"`
 	TrackingURL   string `json:"tracking_url"`
-}
-
-type FailedResponse struct {
-	Error  string `json:"error"`
-	Status string `json:"status"`
 }

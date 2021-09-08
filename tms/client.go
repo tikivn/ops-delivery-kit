@@ -134,12 +134,11 @@ func (c *client) CreateShipment(ctx context.Context, payload Request) (CreateShi
 			return e, errors.Wrapf(err, "tms: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
-		return e, nil
-	}
+		if e.Error != "" {
+			return CreateShipmentResult{}, CreateShipmentFailError{Message: e.Error}
+		}
 
-	failedResponse := FailedResponse{}
-	if err = json.Unmarshal(result, &failedResponse); err == nil {
-		return CreateShipmentResult{}, CreateShipmentFailError{Message: failedResponse.Error}
+		return e, nil
 	}
 
 	return CreateShipmentResult{}, errors.Errorf("tms: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
@@ -265,12 +264,11 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 			return e, errors.Wrapf(err, "tms: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
-		return e, nil
-	}
+		if e.Error != "" {
+			return QuotesResult{}, GetQuotesFailError{Message: e.Error}
+		}
 
-	failedResponse := FailedResponse{}
-	if err = json.Unmarshal(result, &failedResponse); err == nil {
-		return QuotesResult{}, GetQuotesFailError{Message: failedResponse.Error}
+		return e, nil
 	}
 
 	return QuotesResult{}, errors.Errorf("tms: server response status code = %d, response = %s", res.StatusCode, result)
