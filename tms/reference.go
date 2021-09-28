@@ -1,6 +1,10 @@
 package tms
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type RequestRefType string
 
@@ -55,4 +59,15 @@ type InfoResult struct {
 	ReasonCode    string `json:"reason_code"`
 	Driver        Driver `json:"driver"`
 	TrackingURL   string `json:"tracking_url"`
+}
+
+type ActiveDriversResult struct {
+	Status string `json:"status"`
+	Error  struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	} `json:"error,omitempty"`
+	Data struct {
+		DriverIds []uuid.UUID `json:"driver_ids"`
+	} `json:"data,omitempty"`
 }

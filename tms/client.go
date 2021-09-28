@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ochttp"
@@ -25,6 +26,8 @@ type Client interface {
 	CreateShipment(ctx context.Context, req Request) (CreateShipmentResult, error)
 	CancelShipment(ctx context.Context, trackingInfo TrackingInfo) (bool, error)
 	GetShipment(ctx context.Context, trackingInfo TrackingInfo) (InfoResult, error)
+
+	GetActiveDrivers(ctx context.Context, tikiCode string) (driverIds []uuid.UUID, err error)
 }
 
 type client struct {
@@ -284,4 +287,47 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 	}
 
 	return QuotesResult{}, errors.Errorf("tms: server response status code = %d, response = %s", res.StatusCode, result)
+}
+
+func (c *client) GetActiveDrivers(ctx context.Context, tikiCode string) (driverIds []uuid.UUID, err error) {
+	path := fmt.Sprintf("%v/v1/hubs/active-drivers?tiki_code=%s", c.host, tikiCode)
+
+	body := []byte(nil)
+
+	req, err := http.NewRequest("GET", path, bytes.NewBuffer(body))
+	if err != nil {
+		return []uuid.UUID{}, errors.Wrapf(err, "tms: Can not get active drivers")
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Client-Id", c.clientID)
+	req = req.WithContext(ctx)
+
+	res, err := c.httpDoer.Do(req)
+	if err != nil {
+		return []uuid.UUID{}, errors.Wrapf(err, "tms: Response error for query")
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}(res.Body)
+
+	result, err := ioutil.ReadAll(res.Body)
+
+	if res.StatusCode == http.StatusOK {
+		e := ActiveDriversResult{}
+
+		if err := json.Unmarshal(result, &e); err != nil {
+			return []uuid.UUID{}, errors.Wrapf(err, "tms: couldnt decode json, body %s, response %s", string(body), result)
+		}
+
+		if e.Status == "ERROR" {
+			return []uuid.UUID{}, GetQuotesFailError{Message: e.Error.Message}
+		}
+
+		return e.Data.DriverIds, nil
+	}
+
+	return []uuid.UUID{}, errors.Errorf("tms: server response status code = %d, response = %s", res.StatusCode, result)
 }
