@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,7 +28,7 @@ type Client interface {
 	CancelShipment(ctx context.Context, trackingInfo TrackingInfo) (bool, error)
 	GetShipment(ctx context.Context, trackingInfo TrackingInfo) (InfoResult, error)
 
-	GetActiveDrivers(ctx context.Context, tikiCode string) (driverIds []uuid.UUID, err error)
+	GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamCodes []string) (driverIds []uuid.UUID, err error)
 }
 
 type client struct {
@@ -289,8 +290,11 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 	return QuotesResult{}, errors.Errorf("tms: server response status code = %d, response = %s", res.StatusCode, result)
 }
 
-func (c *client) GetActiveDrivers(ctx context.Context, tikiCode string) (driverIds []uuid.UUID, err error) {
-	path := fmt.Sprintf("%v/v1/hubs/active-drivers?tiki_code=%s", c.host, tikiCode)
+func (c *client) GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamCodes []string) (driverIds []uuid.UUID, err error) {
+	path := fmt.Sprintf("%v/v1/hubs/active-p2p-drivers?tiki_code=%s", c.host, tikiCode)
+	if len(teamCodes) > 0 {
+		path += fmt.Sprintf("&team_codes=%s", strings.Join(teamCodes, ","))
+	}
 
 	body := []byte(nil)
 
