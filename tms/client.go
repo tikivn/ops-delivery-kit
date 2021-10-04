@@ -291,7 +291,7 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 }
 
 func (c *client) GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamCodes []string) (driverIds []uuid.UUID, err error) {
-	path := fmt.Sprintf("%v/v1/hubs/active-p2p-drivers?tiki_code=%s", c.host, tikiCode)
+	path := fmt.Sprintf("%v/s2s/v1/attendance/active-p2p-drivers?tiki_code=%s", c.host, tikiCode)
 	if len(teamCodes) > 0 {
 		path += fmt.Sprintf("&team_codes=%s", strings.Join(teamCodes, ","))
 	}
