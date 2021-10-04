@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ochttp"
@@ -28,7 +27,7 @@ type Client interface {
 	CancelShipment(ctx context.Context, trackingInfo TrackingInfo) (bool, error)
 	GetShipment(ctx context.Context, trackingInfo TrackingInfo) (InfoResult, error)
 
-	GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamCodes []string) (driverIds []uuid.UUID, err error)
+	GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamCodes []string) (driverIds []string, err error)
 }
 
 type client struct {
@@ -290,7 +289,7 @@ func (c *client) GetQuotes(ctx context.Context, payload Request) (QuotesResult, 
 	return QuotesResult{}, errors.Errorf("tms: server response status code = %d, response = %s", res.StatusCode, result)
 }
 
-func (c *client) GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamCodes []string) (driverIds []uuid.UUID, err error) {
+func (c *client) GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamCodes []string) (driverIds []string, err error) {
 	path := fmt.Sprintf("%v/s2s/v1/attendance/active-p2p-drivers?tiki_code=%s", c.host, tikiCode)
 	if len(teamCodes) > 0 {
 		path += fmt.Sprintf("&team_codes=%s", strings.Join(teamCodes, ","))
@@ -300,7 +299,7 @@ func (c *client) GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamC
 
 	req, err := http.NewRequest("GET", path, bytes.NewBuffer(body))
 	if err != nil {
-		return []uuid.UUID{}, errors.Wrapf(err, "tms: Can not get active drivers")
+		return []string{}, errors.Wrapf(err, "tms: Can not get active drivers")
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Client-Id", c.clientID)
@@ -308,7 +307,7 @@ func (c *client) GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamC
 
 	res, err := c.httpDoer.Do(req)
 	if err != nil {
-		return []uuid.UUID{}, errors.Wrapf(err, "tms: Response error for query")
+		return []string{}, errors.Wrapf(err, "tms: Response error for query")
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -323,15 +322,15 @@ func (c *client) GetActiveP2PDrivers(ctx context.Context, tikiCode string, teamC
 		e := ActiveDriversResult{}
 
 		if err := json.Unmarshal(result, &e); err != nil {
-			return []uuid.UUID{}, errors.Wrapf(err, "tms: couldnt decode json, body %s, response %s", string(body), result)
+			return []string{}, errors.Wrapf(err, "tms: couldnt decode json, body %s, response %s", string(body), result)
 		}
 
 		if e.Status == "ERROR" {
-			return []uuid.UUID{}, GetQuotesFailError{Message: e.Error.Message}
+			return []string{}, GetQuotesFailError{Message: e.Error.Message}
 		}
 
 		return e.Data.DriverIds, nil
 	}
 
-	return []uuid.UUID{}, errors.Errorf("tms: server response status code = %d, response = %s", res.StatusCode, result)
+	return []string{}, errors.Errorf("tms: server response status code = %d, response = %s", res.StatusCode, result)
 }

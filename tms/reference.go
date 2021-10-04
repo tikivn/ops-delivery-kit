@@ -2,8 +2,6 @@ package tms
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type RequestRefType string
@@ -68,6 +66,6 @@ type ActiveDriversResult struct {
 		Message string `json:"message"`
 	} `json:"error,omitempty"`
 	Data struct {
-		DriverIds []uuid.UUID `json:"driver_ids"`
+		DriverIds []string `json:"driver_ids"`
 	} `json:"data,omitempty"`
 }
