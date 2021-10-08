@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -63,7 +64,9 @@ func (r reporter) Alert(message string) {
 
 func NewReporter(webhookURL string, mentionGroups []string, mentionUsers []string) Reporter {
 	return reporter{
-		httpDoer:      http.DefaultClient,
+		httpDoer: &http.Client{
+			Timeout: 10 * time.Second,
+		},
 		webhookURL:    webhookURL,
 		mentionGroups: mentionGroups,
 		mentionUsers:  mentionUsers,
