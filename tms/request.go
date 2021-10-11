@@ -33,6 +33,7 @@ type Product struct {
 	ProductName string  `json:"product_name"`
 	Qty         int     `json:"qty"`
 	Price       float64 `json:"price"`
+	Weight      float64 `json:"weight"`
 }
 
 type Reference struct {
@@ -40,7 +41,7 @@ type Reference struct {
 	TikiOrderNumber         string    `json:"tiki_order_number"`
 	NumberOfParcelsPerOrder int       `json:"number_of_parcels_per_order"`
 	ParcelInfo              string    `json:"parcel_info"`
-	Product                 []Product `json:"products"`
+	Products                []Product `json:"products"`
 }
 
 type AddressInfo struct {
