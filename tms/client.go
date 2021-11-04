@@ -188,7 +188,7 @@ func (c *client) CancelShipment(ctx context.Context, trackingInfo TrackingInfo) 
 		}
 
 		if e.Error != "" {
-			return false, errors.New(e.Error)
+			return false, CancelShipmentFailError{Message: e.Error}
 		}
 
 		return true, nil
