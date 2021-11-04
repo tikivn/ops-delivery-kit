@@ -184,6 +184,11 @@ func (c *client) CancelShipment(ctx context.Context, trackingInfo TrackingInfo) 
 		return true, nil
 	}
 
+	failedResponse := FailedResponse{}
+	if err = json.Unmarshal(result, &failedResponse); err == nil {
+		return false, CancelShipmentFailError{Message: failedResponse.Error}
+	}
+
 	return false, errors.Errorf("luffy: server response status code = %d, payload = %+v, response = %s", res.StatusCode, string(body), result)
 }
 
