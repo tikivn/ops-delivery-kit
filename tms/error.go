@@ -28,3 +28,15 @@ func (c CreateShipmentFailError) Code() string {
 func (c CreateShipmentFailError) Error() string {
 	return c.Message
 }
+
+type CancelShipmentFailError struct {
+	Message string
+}
+
+func (c CancelShipmentFailError) Code() string {
+	return "FAILED_TO_CANCEL_SHIPMENT"
+}
+
+func (c CancelShipmentFailError) Error() string {
+	return c.Message
+}
