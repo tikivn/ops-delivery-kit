@@ -5,6 +5,7 @@ import (
 )
 
 type Request struct {
+	ClientCode              string       `json:"client_code"`
 	ServiceType             string       `json:"service_type"`
 	ServiceCode             string       `json:"service_code"`
 	RequestedTrackingNumber string       `json:"requested_tracking_number"`
