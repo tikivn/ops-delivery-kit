@@ -18,7 +18,7 @@ func Test_client_GetActiveDriversInArea(t *testing.T) {
 			Timeout: time.Minute,
 		},
 	}
-	activeDrivers, err := c.GetActiveDriversInArea(context.Background(), 10.819296, 106.66963, 5000)
+	activeDrivers, err := c.GetActiveDriversInArea(context.Background(), 101, 101, 5000)
 	assert.Nil(t, err)
 	assert.NotEqualf(t, len(activeDrivers),0,"")
 	fmt.Println(activeDrivers)
