@@ -19,7 +19,7 @@ type HttpDoer interface {
 }
 
 type Client interface {
-	GetActiveDriversInArea(ctx context.Context, lat, lng float32, distance int) ([]ActiveDriversResult, error)
+	GetActiveDriversInArea(ctx context.Context, lat, lng float64, distance int) ([]ActiveDriversResult, error)
 }
 
 type client struct {
@@ -45,7 +45,7 @@ func NewLogPoseClient(host string, clientID string, httpDoer HttpDoer) *client {
 	}
 }
 
-func (c *client) GetActiveDriversInArea(ctx context.Context, lat, lng float32, distance int) ([]ActiveDriversResult, error) {
+func (c *client) GetActiveDriversInArea(ctx context.Context, lat, lng float64, distance int) ([]ActiveDriversResult, error) {
 	var e []ActiveDriversResult
 
 	path := fmt.Sprintf("%s/v1/driver-actives-in-area?lat=%f&lng=%f&distance=%d", c.host, lat, lng, distance)
