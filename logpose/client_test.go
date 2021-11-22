@@ -12,6 +12,7 @@ import (
 
 // go test -count=1 ./logpose -run Test_client_GetActiveDriversInArea -v
 func Test_client_GetActiveDriversInArea(t *testing.T) {
+
 	c := &client{
 		host:     "https://driver-tracking-uat.tiki.com.vn",
 		httpDoer: &http.Client{
