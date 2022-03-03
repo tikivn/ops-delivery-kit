@@ -25,6 +25,7 @@ type TrackingInfo struct {
 	PartnerCode             string       `json:"partner_code"`
 	BusinessType            BusinessType `json:"business_type"`
 	RefType                 string       `json:"ref_type"`
+	Comment                 string       `json:"comment"`
 }
 
 type Product struct {
