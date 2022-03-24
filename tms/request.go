@@ -17,6 +17,7 @@ type Request struct {
 	To                      AddressInfo  `json:"to"`
 	ReturnInfo              *AddressInfo `json:"return_info"`
 	ParcelJob               ParcelJob    `json:"parcel_job"`
+	IsThermalBagRequired    bool         `json:"is_thermal_bag_required"`
 }
 
 type TrackingInfo struct {
