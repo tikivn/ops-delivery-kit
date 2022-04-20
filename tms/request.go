@@ -31,12 +31,13 @@ type TrackingInfo struct {
 }
 
 type Product struct {
-	ProductID   int64   `json:"product_id"`
-	ProductSKU  string  `json:"product_sku"`
-	ProductName string  `json:"product_name"`
-	Qty         int     `json:"qty"`
-	Price       float64 `json:"price"`
-	Weight      float64 `json:"weight"`
+	ProductID   int64      `json:"product_id"`
+	ProductSKU  string     `json:"product_sku"`
+	ProductName string     `json:"product_name"`
+	Qty         int        `json:"qty"`
+	Price       float64    `json:"price"`
+	Weight      float64    `json:"weight"`
+	Dimensions  Dimensions `json:"dimensions"`
 }
 
 type Reference struct {
