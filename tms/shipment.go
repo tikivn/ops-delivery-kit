@@ -1,6 +1,9 @@
 package tms
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 const (
 	STACODCollected       stAction = "cod_collected"
@@ -18,7 +21,7 @@ type StTimestamp struct {
 // MarshalJSON implements the json.Marshaler interface.
 // The time is a quoted string in format yyyy-MM-dd HH:mm:ss
 func (t StTimestamp) MarshalJSON() ([]byte, error) {
-	return []byte(t.Format("2006-01-02 15:04:05")), nil
+	return []byte(fmt.Sprintf(`"%s"`, t.Format("2006-01-02 15:04:05"))), nil
 }
 
 type ShipmentTracking struct {
