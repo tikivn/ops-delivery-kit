@@ -26,6 +26,7 @@ func (t StTimestamp) MarshalJSON() ([]byte, error) {
 
 type ShipmentTracking struct {
 	RefCode   string      `json:"ref_code"`
+	BoxCode   string      `json:"box_code"`
 	Action    stAction    `json:"action"`
 	Timestamp StTimestamp `json:"timestamp"`
 	PartnerID string      `json:"partner_id"`
