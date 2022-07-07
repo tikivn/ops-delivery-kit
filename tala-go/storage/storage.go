@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/tikivn/ops-delivery/util"
 	"go.opencensus.io/plugin/ochttp"
 )
 
@@ -87,7 +86,7 @@ func newRequest(ctx context.Context, url, bucket, filename string, file io.Reade
 		w.Close()
 		return nil, err
 	} else {
-		err = util.Copy(ctx, part, file)
+		err = Copy(ctx, part, file)
 		if err != nil {
 			w.Close()
 			return nil, err

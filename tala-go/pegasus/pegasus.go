@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tikivn/ops-delivery/pkg/httputil"
-
 	"github.com/pkg/errors"
 )
 
@@ -42,7 +40,7 @@ func NewClient(hostQuery, hostSingle string, httpDoer HttpDoer) Client {
 	return &client{
 		hostQuery:  hostQuery,
 		hostSingle: hostSingle,
-		httpDoer:   httputil.NewSnappySupport(httpDoer),
+		httpDoer:   NewSnappySupport(httpDoer),
 	}
 }
 
