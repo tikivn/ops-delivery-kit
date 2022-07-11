@@ -37,5 +37,5 @@ type ShipmentTracking struct {
 	COD         float64     `json:"cod"`
 	Status      string      `json:"status"`
 	SubStatus   string      `json:"sub_status"`
-	TaskType 	string		`json:"task_type"`
+	TaskType    string      `json:"task_type"`
 }
