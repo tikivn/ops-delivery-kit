@@ -24,7 +24,7 @@ type Request struct {
 type TrackingInfo struct {
 	ServiceType             string       `json:"service_type"`
 	ServiceCode             string       `json:"service_code"`
-	RequestedTrackingNumber string       `json:"requested_tracking_number"`
+	RequestedTrackingNumber string       `json:"requested_tracking_number" validate:"required"`
 	PartnerCode             string       `json:"partner_code"`
 	BusinessType            BusinessType `json:"business_type"`
 	RefType                 string       `json:"ref_type"`
