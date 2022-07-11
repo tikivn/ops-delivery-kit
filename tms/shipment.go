@@ -33,4 +33,9 @@ type ShipmentTracking struct {
 	PartnerID   string      `json:"partner_id"`
 	DriverID    string      `json:"driver_id"`
 	HubID       string      `json:"hub_id"`
+	ClientName  string      `json:"client_name"`
+	COD         float64     `json:"cod"`
+	Status      string      `json:"status"`
+	SubStatus   string      `json:"sub_status"`
+	TaskType    string      `json:"task_type"`
 }
