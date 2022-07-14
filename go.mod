@@ -8,6 +8,7 @@ require (
 	github.com/dimchansky/utfbom v1.1.1
 	github.com/getsentry/raven-go v0.2.0
 	github.com/go-kit/kit v0.9.0
+	github.com/go-pg/pg/v10 v10.10.6
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/golang/snappy v0.0.4
