@@ -4,6 +4,7 @@
 package redis
 
 import (
+	"context"
 	"log"
 	"net"
 	"os"
@@ -12,12 +13,12 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 )
 
-func SetupRedisTest() (client *redis.Client, cleanUp func() error, err error) {
+func SetupRedisTest(ctx context.Context) (client *redis.Client, cleanUp func() error, err error) {
 	_, filename, _, _ := runtime.Caller(0)
 	dir := path.Join(path.Dir(filename), "..")
 	err = os.Chdir(dir)
@@ -66,7 +67,7 @@ func SetupRedisTest() (client *redis.Client, cleanUp func() error, err error) {
 			Addr: addr,
 		})
 
-		return client.Ping().Err()
+		return client.Ping(ctx).Err()
 	}); err != nil {
 		log.Fatalf("Cannot connect to redis with address %s due to %+v", addr, err)
 	}
