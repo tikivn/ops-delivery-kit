@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/tikivn/ops-delivery/util"
+	"github.com/tikivn/ops-delivery-kit/util"
 	"go.opencensus.io/plugin/ochttp"
 )
 

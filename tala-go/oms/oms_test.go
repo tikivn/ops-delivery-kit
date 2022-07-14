@@ -11,7 +11,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
-	"github.com/tikivn/ops-delivery/pkg/tala-go/oms"
+	"github.com/tikivn/ops-delivery-kit/tala-go/oms"
 )
 
 func NewThemisHttp() oms.HttpDoer {

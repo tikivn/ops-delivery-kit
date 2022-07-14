@@ -46,7 +46,7 @@ func TestKafkaPublisher_Publish(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p, err := NewPublisher(tt.fields.brokers, tt.fields.topic)
+			p, err := NewPublisher(tt.fields.brokers, tt.fields.topic, nil)
 			if err != nil {
 				t.Error(err)
 			}
