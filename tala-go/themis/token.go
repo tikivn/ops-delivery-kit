@@ -62,7 +62,7 @@ func (c *ClientToken) FetchToken(ctx context.Context) (*AccessToken, error) {
 	if err = json.NewDecoder(res.Body).Decode(data); err != nil {
 		return nil, err
 	}
-	if data.Error != nil {
+	if data.ThemisError != nil {
 		return nil, data.ThemisError
 	}
 	return data.AccessToken, nil

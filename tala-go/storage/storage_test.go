@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/tikivn/ops-delivery/pkg/tala-go/storage"
+	"github.com/tikivn/ops-delivery-kit/tala-go/storage"
 )
 
 func Test_service_UploadFile(t *testing.T) {

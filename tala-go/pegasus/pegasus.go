@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tikivn/ops-delivery/pkg/httputil"
+	"github.com/tikivn/ops-delivery-kit/pkg/httputil"
 
 	"github.com/pkg/errors"
 )
