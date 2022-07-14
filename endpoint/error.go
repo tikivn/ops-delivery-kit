@@ -1,5 +1,7 @@
 package endpoint
 
+import "fmt"
+
 type BizError interface {
 	error
 	Code() string
@@ -13,4 +15,18 @@ type Error struct {
 
 func (e Error) Error() string {
 	return e.Message
+}
+
+var ErrInternal = map[string]interface{}{
+	"code":    "INTERNAL_ERROR",
+	"message": "Có lỗi hệ thống xảy ra",
+}
+
+type ErrBadRequest struct {
+	Field   string
+	Message string
+}
+
+func (e ErrBadRequest) Error() string {
+	return fmt.Sprintf("%s: %s", e.Field, e.Message)
 }

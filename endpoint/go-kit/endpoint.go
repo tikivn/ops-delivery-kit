@@ -1,4 +1,4 @@
-package endpoint
+package go_kit
 
 import (
 	"context"
@@ -7,104 +7,28 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/getsentry/raven-go"
+	endpoint_kit "github.com/go-kit/kit/endpoint"
+	"github.com/tikivn/ops-delivery-kit/endpoint"
 	"go.opencensus.io/trace"
-
-	"github.com/go-kit/kit/endpoint"
 )
-
-const (
-	DefaultPage     = 1
-	DefaultPageSize = 20
-
-	PageSizeQuery = "size"
-	PageNumQuery  = "page"
-)
-
-type ErrBadRequest struct {
-	Field   string
-	Message string
-}
-
-func (e ErrBadRequest) Error() string {
-	return fmt.Sprintf("%s: %s", e.Field, e.Message)
-}
-
-type Status string
-
-const (
-	StatusOk    = Status("OK")
-	StatusError = Status("ERROR")
-)
-
-type pagingResponse struct {
-	Total       int `json:"total"`
-	CurrentPage int `json:"current_page"`
-	From        int `json:"from"`
-	To          int `json:"to"`
-	PerPage     int `json:"per_page"`
-	LastPage    int `json:"last_page"`
-}
-
-func (p *pagingResponse) Pagination() (int, int, int) {
-	return p.Total, p.CurrentPage, p.PerPage
-}
-
-func NewPaging(total, page, size int) *pagingResponse {
-	if total == 0 {
-		return &pagingResponse{
-			PerPage: size,
-		}
-	}
-
-	return &pagingResponse{
-		Total:       total,
-		CurrentPage: page,
-		From:        (page-1)*size + 1,
-		To:          page * size,
-		PerPage:     size,
-		LastPage: func(total, perpage int) int {
-			if total%perpage != 0 {
-				return total/perpage + 1
-			}
-			return total / perpage
-		}(total, size),
-	}
-}
-
-type BasicResponse struct {
-	Status Status                 `json:"status"`
-	Data   interface{}            `json:"data,omitempty"`
-	Paging *pagingResponse        `json:"paging,omitempty"`
-	Error  map[string]interface{} `json:"error,omitempty"`
-}
-
-type ExtraData interface {
-	Data() interface{}
-}
-
-var errInternal = map[string]interface{}{
-	"code":    "INTERNAL_ERROR",
-	"message": "Có lỗi hệ thống xảy ra",
-}
 
 // EncodeError encode errors from business-logic
 func EncodeError(ctx context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-	res := &BasicResponse{Status: StatusError}
+	res := &endpoint.BasicResponse{Status: endpoint.StatusError}
 	var statusCode int
 	switch e := err.(type) {
-	case ErrBadRequest:
+	case endpoint.ErrBadRequest:
 		res.Error = map[string]interface{}{
 			"code":    "VALIDATION_ERROR",
 			"message": e.Error(),
 		}
 
 		statusCode = http.StatusBadRequest
-	case BizError:
+	case endpoint.BizError:
 		res.Error = map[string]interface{}{
 			"code":    e.Code(),
 			"message": e.Error(),
@@ -116,15 +40,15 @@ func EncodeError(ctx context.Context, err error, w http.ResponseWriter) {
 		packet := raven.NewPacket(
 			err.Error(),
 			raven.NewException(err, raven.GetOrNewStacktrace(err, 2, 3, nil)),
-			HttpFromContext(ctx),
+			endpoint.HttpFromContext(ctx),
 		)
 		raven.Capture(packet, nil)
-		res.Error = errInternal
+		res.Error = endpoint.ErrInternal
 
 		statusCode = http.StatusInternalServerError
 	}
 
-	if data, ok := err.(ExtraData); ok {
+	if data, ok := err.(endpoint.ExtraData); ok {
 		res.Error["data"] = data.Data()
 	}
 
@@ -133,29 +57,25 @@ func EncodeError(ctx context.Context, err error, w http.ResponseWriter) {
 	json.NewEncoder(w).Encode(res)
 }
 
-type Pager interface {
-	Pagination() (total, page, size int)
-}
-
 func EncodeResponse(
 	ctx context.Context,
 	w http.ResponseWriter,
 	data interface{},
 ) error {
-	if f, ok := data.(endpoint.Failer); ok {
+	if f, ok := data.(endpoint_kit.Failer); ok {
 		if e := f.Failed(); e != nil {
 			EncodeError(ctx, e, w)
 			return nil
 		}
 	}
 
-	res := &BasicResponse{
-		Status: StatusOk,
+	res := &endpoint.BasicResponse{
+		Status: endpoint.StatusOk,
 		Data:   data,
 	}
 
-	if p, ok := data.(Pager); ok {
-		res.Paging = NewPaging(p.Pagination())
+	if p, ok := data.(endpoint.Pager); ok {
+		res.Paging = endpoint.NewPaging(p.Pagination())
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -172,25 +92,25 @@ func EncodeListDataResponse(
 	w http.ResponseWriter,
 	data interface{},
 ) error {
-	if f, ok := data.(endpoint.Failer); ok {
+	if f, ok := data.(endpoint_kit.Failer); ok {
 		if e := f.Failed(); e != nil {
 			EncodeError(ctx, e, w)
 			return nil
 		}
 	}
 
-	res := &BasicResponse{
-		Status: StatusOk,
+	res := &endpoint.BasicResponse{
+		Status: endpoint.StatusOk,
 	}
 
-	if d, ok := data.(ExtraData); ok {
+	if d, ok := data.(endpoint.ExtraData); ok {
 		res.Data = d.Data()
 	} else {
 		res.Data = data
 	}
 
-	if p, ok := data.(Pager); ok {
-		res.Paging = NewPaging(p.Pagination())
+	if p, ok := data.(endpoint.Pager); ok {
+		res.Paging = endpoint.NewPaging(p.Pagination())
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -209,7 +129,7 @@ type File struct {
 }
 
 func EncodeFileResponse(ctx context.Context, w http.ResponseWriter, resp interface{}) error {
-	if f, ok := resp.(endpoint.Failer); ok {
+	if f, ok := resp.(endpoint_kit.Failer); ok {
 		if e := f.Failed(); e != nil {
 			EncodeError(ctx, e, w)
 			return nil
@@ -236,22 +156,22 @@ func EncodeFileResponse(ctx context.Context, w http.ResponseWriter, resp interfa
 }
 
 func EncodeErrorV2(ctx context.Context, err error, w http.ResponseWriter) {
-	res := &BasicResponse{Status: StatusError}
+	res := &endpoint.BasicResponse{Status: endpoint.StatusError}
 	statusCode := 400
 	switch e := err.(type) {
-	case ErrBadRequest:
+	case endpoint.ErrBadRequest:
 		res.Error = map[string]interface{}{
 			"code":    "VALIDATION_ERROR",
 			"message": e.Error(),
 		}
-	case BizError:
+	case endpoint.BizError:
 		res.Error = map[string]interface{}{
 			"code":    e.Code(),
 			"message": e.Error(),
 		}
 
 		statusCode = http.StatusOK
-	case Error:
+	case endpoint.Error:
 		res.Error = map[string]interface{}{
 			"code":    e.Code,
 			"message": e.Message,
@@ -264,13 +184,13 @@ func EncodeErrorV2(ctx context.Context, err error, w http.ResponseWriter) {
 		packet := raven.NewPacket(
 			err.Error(),
 			raven.NewException(err, raven.GetOrNewStacktrace(err, 2, 3, nil)),
-			HttpFromContext(ctx),
+			endpoint.HttpFromContext(ctx),
 		)
 		raven.Capture(packet, nil)
-		res.Error = errInternal
+		res.Error = endpoint.ErrInternal
 	}
 
-	if data, ok := err.(ExtraData); ok {
+	if data, ok := err.(endpoint.ExtraData); ok {
 		res.Error["data"] = data.Data()
 	}
 
@@ -284,7 +204,7 @@ func EncodeRawDataResponse(
 	w http.ResponseWriter,
 	data interface{},
 ) error {
-	if f, ok := data.(endpoint.Failer); ok {
+	if f, ok := data.(endpoint_kit.Failer); ok {
 		if e := f.Failed(); e != nil {
 			EncodeError(ctx, e, w)
 			return nil
@@ -298,58 +218,4 @@ func EncodeRawDataResponse(
 		w.Header().Set("x-trace-id", spanCtx.TraceID.String())
 	}
 	return json.NewEncoder(w).Encode(data)
-}
-
-type PagingQuerier struct {
-	PageNum  int
-	PageSize int
-}
-
-func (p PagingQuerier) IsZero() bool {
-	return p.PageSize == 0 && p.PageNum == 0
-}
-
-func PagingFromRequest(_ context.Context, r *http.Request) (PagingQuerier, error) {
-	q := r.URL.Query()
-
-	pageNum := 0
-	pageNumStr := strings.TrimSpace(q.Get(PageNumQuery))
-	if pageNumStr != "" {
-		n, err := strconv.ParseInt(pageNumStr, 10, 64)
-		if err != nil {
-			return PagingQuerier{}, err
-		}
-		pageNum = int(n)
-	}
-
-	pageSize := 0
-	pageSizeStr := strings.TrimSpace(q.Get(PageSizeQuery))
-	if pageSizeStr != "" {
-		n, err := strconv.ParseInt(pageSizeStr, 10, 64)
-		if err != nil {
-			return PagingQuerier{}, err
-		}
-		pageSize = int(n)
-	}
-
-	return PagingQuerier{
-		PageNum:  pageNum,
-		PageSize: pageSize,
-	}, nil
-}
-
-func PagingWithDefault(ctx context.Context, r *http.Request) (PagingQuerier, error) {
-	pager, err := PagingFromRequest(ctx, r)
-	if err != nil {
-		return PagingQuerier{}, err
-	}
-
-	if !pager.IsZero() {
-		return pager, nil
-	}
-
-	return PagingQuerier{
-		PageNum:  DefaultPage,
-		PageSize: DefaultPageSize,
-	}, nil
 }
