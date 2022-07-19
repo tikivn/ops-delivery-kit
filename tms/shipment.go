@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	STACODCollected       stAction = "cod_collected"
-	STASuccessfulDelivery stAction = "successful_delivery"
+	STACODCollected       StAction = "cod_collected"
+	STASuccessfulDelivery StAction = "successful_delivery"
 )
 
 // Shipment tracking action
-type stAction string
+type StAction string
 
 // StTimestamp Shipment tracking timestamp
 type StTimestamp struct {
@@ -28,9 +28,14 @@ type ShipmentTracking struct {
 	RequestCode string      `json:"request_code"`
 	RefCode     string      `json:"ref_code"`
 	BoxCode     string      `json:"box_code"`
-	Action      stAction    `json:"action"`
+	Action      StAction    `json:"action"`
 	Timestamp   StTimestamp `json:"timestamp"`
 	PartnerID   string      `json:"partner_id"`
 	DriverID    string      `json:"driver_id"`
 	HubID       string      `json:"hub_id"`
+	ClientName  string      `json:"client_name"`
+	COD         float64     `json:"cod"`
+	Status      string      `json:"status"`
+	SubStatus   string      `json:"sub_status"`
+	TaskType    string      `json:"task_type"`
 }
