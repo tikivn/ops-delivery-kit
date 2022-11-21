@@ -1,4 +1,4 @@
-package util
+package math
 
 import (
 	"math"
@@ -35,4 +35,18 @@ func Round2Nearest(x float64, y float64) float64 {
 	}
 
 	return math.Round(x*math.Pow(10, y)) / math.Pow(10, y)
+}
+
+func Round(val float64, roundOn float64, precision int) (newVal float64) {
+	var round float64
+	pow := math.Pow(10, float64(precision))
+	digit := pow * val
+	_, div := math.Modf(digit)
+	if div >= roundOn {
+		round = math.Ceil(digit)
+	} else {
+		round = math.Floor(digit)
+	}
+	newVal = round / pow
+	return
 }
