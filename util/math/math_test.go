@@ -36,11 +36,11 @@ func TestAbs(t *testing.T) {
 	}
 }
 
-func TestRound(t *testing.T) {
+func TestRoundToBreakpoint(t *testing.T) {
 	type args struct {
 		val        float64
 		roundPoint float64
-		precision  int
+		precision  uint
 	}
 	tests := []struct {
 		name       string
@@ -78,16 +78,26 @@ func TestRound(t *testing.T) {
 			wantNewVal: 0,
 			wantErr:    true,
 		},
+		{
+			name: "negative precision",
+			args: args{
+				val:        -10.66345,
+				roundPoint: 0.5,
+				precision:  1,
+			},
+			wantNewVal: -10.7,
+			wantErr:    false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotNewVal, err := Round(tt.args.val, tt.args.roundPoint, tt.args.precision)
+			gotNewVal, err := RoundToBreakpoint(tt.args.val, tt.args.roundPoint, tt.args.precision)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Round() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("RoundToBreakpoint() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if gotNewVal != tt.wantNewVal {
-				t.Errorf("Round() gotNewVal = %v, want %v", gotNewVal, tt.wantNewVal)
+				t.Errorf("RoundToBreakpoint() gotNewVal = %v, want %v", gotNewVal, tt.wantNewVal)
 			}
 		})
 	}
