@@ -39,7 +39,7 @@ func Round2Nearest(x float64, y float64) float64 {
 	return math.Round(x*math.Pow(10, y)) / math.Pow(10, y)
 }
 
-func Round(val float64, roundPoint float64, precision int) (newVal float64, err error) {
+func RoundToBreakpoint(val float64, roundPoint float64, precision uint) (newVal float64, err error) {
 	if roundPoint >= 1 || roundPoint <= 0 {
 		return 0, errors.New("Invalid round point (must greater than 0 and lower than 1)")
 	}
@@ -54,4 +54,9 @@ func Round(val float64, roundPoint float64, precision int) (newVal float64, err 
 	}
 	newVal = round / pow
 	return newVal, nil
+}
+
+func RoundWithPrecision(val float64, precision uint) float64 {
+	round, _ := RoundToBreakpoint(val, 0.5, precision)
+	return round
 }
