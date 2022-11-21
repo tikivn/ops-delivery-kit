@@ -38,38 +38,56 @@ func TestAbs(t *testing.T) {
 
 func TestRound(t *testing.T) {
 	type args struct {
-		val       float64
-		roundOn   float64
-		precision int
+		val        float64
+		roundPoint float64
+		precision  int
 	}
 	tests := []struct {
 		name       string
 		args       args
 		wantNewVal float64
+		wantErr    bool
 	}{
 		{
-			name: "Over point",
+			name: "not over point",
 			args: args{
-				val:       10.662435,
-				roundOn:   0.5,
-				precision: 1,
-			},
-			wantNewVal: 10.7,
-		},
-		{
-			name: "Not over point",
-			args: args{
-				val:       10.662435,
-				roundOn:   0.5,
-				precision: 2,
+				val:        10.66345,
+				roundPoint: 0.5,
+				precision:  2,
 			},
 			wantNewVal: 10.66,
+			wantErr:    false,
+		},
+		{
+			name: "over point",
+			args: args{
+				val:        10.66345,
+				roundPoint: 0.5,
+				precision:  1,
+			},
+			wantNewVal: 10.7,
+			wantErr:    false,
+		},
+		{
+			name: "invalid point",
+			args: args{
+				val:        10.66345,
+				roundPoint: 1,
+				precision:  2,
+			},
+			wantNewVal: 0,
+			wantErr:    true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewVal := Round(tt.args.val, tt.args.roundOn, tt.args.precision); gotNewVal != tt.wantNewVal {
-				t.Errorf("Round() = %v, want %v", gotNewVal, tt.wantNewVal)
+			gotNewVal, err := Round(tt.args.val, tt.args.roundPoint, tt.args.precision)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Round() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotNewVal != tt.wantNewVal {
+				t.Errorf("Round() gotNewVal = %v, want %v", gotNewVal, tt.wantNewVal)
 			}
 		})
 	}

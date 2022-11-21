@@ -5,6 +5,8 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/sirupsen/logrus"
+
 	math2 "github.com/tikivn/ops-delivery-kit/util/math"
 )
 
@@ -21,7 +23,16 @@ func HumanFileSize(size float64) string {
 	suffixes[4] = "TB"
 
 	base := math.Log(size) / math.Log(1024)
-	getSize := math2.Round(math.Pow(1024, base-math.Floor(base)), .5, 2)
+	afterBase := math.Pow(1024, base-math.Floor(base))
+	getSize, err := math2.Round(afterBase, .5, 2)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"func":   "HumanFileSize",
+			"reason": err,
+			"input":  fmt.Sprintf("Value ( %f ) round point ( %f ) precision %d", afterBase, 0.5, 2),
+		}).Infof("Use default round...")
+		getSize = math.Round(afterBase)
+	}
 	getSuffix := suffixes[int(math.Floor(base))]
 	return strconv.FormatFloat(getSize, 'f', -1, 64) + " " + string(getSuffix)
 }
