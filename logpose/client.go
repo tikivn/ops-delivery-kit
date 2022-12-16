@@ -20,6 +20,7 @@ type HttpDoer interface {
 
 type Client interface {
 	GetActiveDriversInArea(ctx context.Context, lat, lng float64, distance int) ([]ActiveDriversResult, error)
+	Geocode(ctx context.Context, payload GeocodePayload) (Coordinates, error)
 }
 
 type client struct {
@@ -83,4 +84,45 @@ func (c *client) GetActiveDriversInArea(ctx context.Context, lat, lng float64, d
 	}
 
 	return e, errors.Errorf("logpose: server response status code = %d, response = %s", res.StatusCode, result)
+}
+
+func (c *client) Geocode(ctx context.Context, payload GeocodePayload) (Coordinates, error) {
+	var result Coordinates
+
+	path := fmt.Sprintf("%s/v1/geocode", c.host)
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return result, errors.Wrapf(err, "logpose geocode: Can not marshal request body")
+	}
+
+	req, err := http.NewRequest("POST", path, bytes.NewBuffer(body))
+	if err != nil {
+		return result, errors.Wrapf(err, "logpose geocode: NewRequest failed")
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Client-Id", c.clientID)
+	req = req.WithContext(ctx)
+
+	res, err := c.httpDoer.Do(req)
+	if err != nil {
+		return result, errors.Wrapf(err, "logpose geocode: Response error for query")
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}(res.Body)
+
+	resBody, err := ioutil.ReadAll(res.Body)
+
+	if res.StatusCode == http.StatusOK {
+		if err := json.Unmarshal(resBody, &result); err != nil {
+			return result, errors.Wrapf(err, "logpose geocode: couldnt decode json, body %s, response %v", string(body), result)
+		}
+		return result, nil
+	}
+
+	return result, errors.Errorf("logpose geocode: server response status code = %d, response = %v", res.StatusCode, result)
 }
