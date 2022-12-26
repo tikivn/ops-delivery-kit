@@ -10,8 +10,9 @@ import (
 
 	"github.com/getsentry/raven-go"
 	endpoint_kit "github.com/go-kit/kit/endpoint"
-	"github.com/tikivn/ops-delivery-kit/endpoint"
 	"go.opencensus.io/trace"
+
+	"github.com/tikivn/ops-delivery-kit/endpoint"
 )
 
 // EncodeError encode errors from business-logic
@@ -156,6 +157,8 @@ func EncodeFileResponse(ctx context.Context, w http.ResponseWriter, resp interfa
 }
 
 func EncodeErrorV2(ctx context.Context, err error, w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
 	res := &endpoint.BasicResponse{Status: endpoint.StatusError}
 	statusCode := 400
 	switch e := err.(type) {
@@ -195,7 +198,6 @@ func EncodeErrorV2(ctx context.Context, err error, w http.ResponseWriter) {
 	}
 
 	w.WriteHeader(statusCode)
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(res)
 }
 
