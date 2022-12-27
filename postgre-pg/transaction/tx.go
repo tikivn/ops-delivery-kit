@@ -13,6 +13,12 @@ import (
 
 type Tx struct {
 	*pg.Tx
+	isClosed bool
+}
+
+func (tx Tx) RunTransaction(ctx context.Context, fn func(tx *pg.Tx) error) error {
+	tx.isClosed = true
+	return tx.Tx.RunInTransaction(ctx, fn)
 }
 
 type transaction struct {
@@ -63,15 +69,13 @@ func (t *transaction) RunWithTransaction(ctx context.Context, fn func(ctx contex
 		ctx = ContextWithTransaction(ctx, tr)
 
 		// thực hiện commit cho transaction
-		return tr.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		return tr.RunTransaction(ctx, func(tx *pg.Tx) error {
 			return fn(ctx)
 		})
 	}
 
 	// Transaction đã được khởi tạo trước đó, để cho layer phía trên tự commit
-	return HandleExecuteWithTransactionalInContext(ctx, tx, func() error {
-		return fn(ctx)
-	})
+	return fn(ctx)
 }
 
 func HandleExecuteWithTransactionalInContext(ctx context.Context, db orm.DB, fn func() error) error {
