@@ -2,10 +2,12 @@ package transaction
 
 import (
 	"context"
-	"errors"
+	"reflect"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
+	"github.com/pkg/errors"
+
 	transaction2 "github.com/tikivn/ops-delivery-kit/transaction"
 )
 
@@ -49,23 +51,25 @@ func TransactionFromContext(ctx context.Context, fallback orm.DB) orm.DB {
 }
 
 func (t *transaction) RunWithTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
-	var executor orm.DB
-
 	tx := TransactionFromContext(ctx, nil)
+
+	// Nếu transaction chưa được khởi tạo thì thời điểm hiện tại là thời điểm transaction bắt đầu
 	if tx == nil {
 		tr, err := t.Begin(ctx)
 		if err != nil {
 			return err
 		}
 
-		tx = tr
-		executor = t.db
-	} else {
-		executor = tx
+		ctx = ContextWithTransaction(ctx, tr)
+
+		// thực hiện commit cho transaction
+		return tr.RunInTransaction(ctx, func(tx *pg.Tx) error {
+			return fn(ctx)
+		})
 	}
 
-	ctx = ContextWithTransaction(ctx, tx)
-	return HandleExecuteWithTransactionalInContext(ctx, executor, func() error {
+	// Transaction đã được khởi tạo trước đó, để cho layer phía trên tự commit
+	return HandleExecuteWithTransactionalInContext(ctx, tx, func() error {
 		return fn(ctx)
 	})
 }
@@ -81,6 +85,7 @@ func HandleExecuteWithTransactionalInContext(ctx context.Context, db orm.DB, fn 
 		})
 
 	default:
-		return errors.New("invalid database instance type to execute transaction")
+		txDbType := reflect.TypeOf(txDB)
+		return errors.Errorf("invalid database instance type to execute transaction with type: %s", txDbType.Name())
 	}
 }
