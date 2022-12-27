@@ -49,13 +49,23 @@ func TransactionFromContext(ctx context.Context, fallback orm.DB) orm.DB {
 }
 
 func (t *transaction) RunWithTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
-	tx, err := t.Begin(ctx)
-	if err != nil {
-		return err
+	var executor orm.DB
+
+	tx := TransactionFromContext(ctx, nil)
+	if tx == nil {
+		tr, err := t.Begin(ctx)
+		if err != nil {
+			return err
+		}
+
+		tx = tr
+		executor = t.db
+	} else {
+		executor = tx
 	}
 
-	ctx = ContextWithTransaction(ctx, tx.Tx)
-	return tx.RunInTransaction(ctx, func(tx *pg.Tx) error {
+	ctx = ContextWithTransaction(ctx, tx)
+	return HandleExecuteWithTransactionalInContext(ctx, executor, func() error {
 		return fn(ctx)
 	})
 }
