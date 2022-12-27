@@ -19,6 +19,7 @@ type Request struct {
 	ReturnInfo              *AddressInfo `json:"return_info"`
 	ParcelJob               ParcelJob    `json:"parcel_job"`
 	IsThermalBagRequired    bool         `json:"is_thermal_bag_required"`
+	IsContentViewable       bool         `json:"is_content_viewable"`
 }
 
 type TrackingInfo struct {
