@@ -127,8 +127,8 @@ func PagingWithDefault(ctx context.Context, r *http.Request) (PagingQuerier, err
 }
 
 type Pagable interface {
-	Data() interface{}
-	Pagination() (total, page, size int)
+	ExtraData
+	Pager
 }
 
 type pagableResponse struct {
