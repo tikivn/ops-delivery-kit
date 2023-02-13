@@ -125,3 +125,30 @@ func PagingWithDefault(ctx context.Context, r *http.Request) (PagingQuerier, err
 		PageSize: DefaultPageSize,
 	}, nil
 }
+
+type Pagable interface {
+	Data() interface{}
+	Pagination() (total, page, size int)
+}
+
+type pagableResponse struct {
+	ls                interface{}
+	total, page, size int
+}
+
+func (r pagableResponse) Data() interface{} {
+	return r.ls
+}
+
+func (r pagableResponse) Pagination() (total, page, size int) {
+	return r.total, r.page, r.size
+}
+
+func NewPagingResponse(any interface{}, total, page, size int) Pagable {
+	return pagableResponse{
+		ls:    any,
+		total: total,
+		page:  page,
+		size:  size,
+	}
+}
