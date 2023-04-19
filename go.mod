@@ -19,11 +19,13 @@ require (
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/tdewolff/minify/v2 v2.11.12
 	github.com/tealeg/xlsx v1.0.5
 	go.opencensus.io v0.23.0
 	go.opentelemetry.io/otel v1.7.0
 	go.opentelemetry.io/otel/trace v1.7.0
 	golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0
+	gorm.io/driver/postgres v1.5.0
+	gorm.io/gorm v1.25.0
 )
