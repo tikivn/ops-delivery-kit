@@ -1,6 +1,8 @@
 package endpoint
 
-import "fmt"
+import (
+	"strings"
+)
 
 type BizError interface {
 	error
@@ -28,5 +30,18 @@ type ErrBadRequest struct {
 }
 
 func (e ErrBadRequest) Error() string {
-	return fmt.Sprintf("%s: %s", e.Field, e.Message)
+	arr := make([]string, 0, 2)
+	if str := strings.TrimSpace(e.Field); str != "" {
+		arr = append(arr, str)
+	}
+
+	if str := strings.TrimSpace(e.Message); str != "" {
+		arr = append(arr, str)
+	}
+
+	return strings.Join(arr, ": ")
+}
+
+func (e ErrBadRequest) Failed() error {
+	return e
 }

@@ -145,6 +145,10 @@ func (r pagableResponse) Pagination() (total, page, size int) {
 }
 
 func NewPagingResponse(any interface{}, total, page, size int) Pagable {
+	if page <= 0 && size <= 0 && total > 0 {
+		page = 1
+		size = total
+	}
 	return pagableResponse{
 		ls:    any,
 		total: total,
