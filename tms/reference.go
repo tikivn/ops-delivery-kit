@@ -51,12 +51,13 @@ type EstimatedTimeline struct {
 }
 
 type InfoResult struct {
-	Error         string `json:"error,omitempty"`
-	Quote         Quote  `json:"quote"`
-	CurrentStatus string `json:"current_status"`
-	ReasonCode    string `json:"reason_code"`
-	Driver        Driver `json:"driver"`
-	TrackingURL   string `json:"tracking_url"`
+	Error          string  `json:"error,omitempty"`
+	Quote          Quote   `json:"quote"`
+	CurrentStatus  string  `json:"current_status"`
+	ReasonCode     string  `json:"reason_code"`
+	Driver         Driver  `json:"driver"`
+	TrackingURL    string  `json:"tracking_url"`
+	CashOnDelivery float64 `json:"cash_on_delivery"`
 }
 
 type ActiveDriversResult struct {
